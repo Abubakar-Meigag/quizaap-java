@@ -3,13 +3,16 @@ package com.quizapp.project.service;
 import com.quizapp.project.dao.QuestionDao;
 import com.quizapp.project.dao.QuizDao;
 import com.quizapp.project.model.Question;
+import com.quizapp.project.model.QuestionsWrapper;
 import com.quizapp.project.model.Quiz;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class QuizService {
@@ -35,4 +38,17 @@ public class QuizService {
             return new ResponseEntity<>("Error", HttpStatus.BAD_REQUEST);
         }
     };
+
+    public ResponseEntity<List<QuestionsWrapper>> getQuizQuestions(Integer id) {
+        Optional<Quiz> quiz = quizDao.findById(id);
+        List<Question> questionsFromDB = quiz.get().getQuestions();
+        List<QuestionsWrapper> questionsForUser = new ArrayList<>();
+
+        for (Question q : questionsFromDB){
+            QuestionsWrapper qw = new QuestionsWrapper(q.getId(), q.getQuestionTitle(), q.getOption1(), q.getOption2(), q.getOption3(), q.getOption4());
+            questionsForUser.add(qw);
+        }
+
+        return new  ResponseEntity<>(questionsForUser, HttpStatus.OK);
+    }
 }
